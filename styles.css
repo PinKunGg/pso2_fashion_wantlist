@@ -100,8 +100,10 @@ button {
 .total-chip.total-pending { background: rgba(217,186,30,0.15); color: var(--warn); border-color: var(--warn); }
 .total-chip.total-out { background: rgba(217,7,7,0.15); color: var(--bad); border-color: var(--bad); }
 
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table {
   width: 100%;
+  min-width: 760px;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -161,3 +163,23 @@ tr.drag-over-bottom td { box-shadow: inset 0 -2px 0 0 var(--accent); }
 
 #file-input { display: none; }
 .edit-cell input { width: 100%; padding: 5px 6px; font-size: 13px; }
+
+@media (max-width: 900px) {
+  body { padding: 14px; }
+  h1 { font-size: 22px; }
+  form#entry-form { grid-template-columns: 1fr 1fr; }
+  form#entry-form button { grid-column: span 1; }
+  .filter-input { min-width: 0; flex: 1 1 140px; }
+  #filter-name { min-width: 0; }
+}
+
+@media (max-width: 560px) {
+  body { padding: 10px; }
+  .panel { padding: 12px; border-radius: 8px; }
+  form#entry-form { grid-template-columns: 1fr; }
+  .toolbar { gap: 8px; }
+  .toolbar button, .toolbar .filter-input { width: 100%; }
+  .total-breakdown { width: 100%; }
+  .count { width: 100%; }
+  table { min-width: 640px; }
+}
