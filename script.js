@@ -18,6 +18,26 @@
   const fStatus = document.getElementById('f-status');
   const filterNameInput = document.getElementById('filter-name');
   const filterStatusSelect = document.getElementById('filter-status');
+  const dupIndicator = document.getElementById('dup-indicator');
+
+  function isDuplicateName(name) {
+    const val = name.trim().toLowerCase();
+    return !!val && items.some(i => (i.itemName || '').trim().toLowerCase() === val);
+  }
+
+  function checkDuplicate() {
+    const val = fItemName.value.trim();
+    if (!val) {
+      dupIndicator.className = 'dup-indicator';
+      dupIndicator.textContent = '';
+      return;
+    }
+    const exists = isDuplicateName(val);
+    dupIndicator.textContent = exists ? '⚠ Already in list' : '✓ New item';
+    dupIndicator.className = 'dup-indicator ' + (exists ? 'dup-exists' : 'dup-new');
+  }
+
+  fItemName.addEventListener('input', checkDuplicate);
 
   function load() {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -81,7 +101,6 @@
       filtered.forEach(item => {
         const tr = document.createElement('tr');
         tr.dataset.id = item.id;
-        tr.draggable = true;
 
         const imgCell = item.image
           ? `<img src="${escapeHtml(item.image)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'noimg',textContent:'no img'}))">`
@@ -96,7 +115,7 @@
           : '—';
 
         tr.innerHTML = `
-          <td class="drag-col"><span class="drag-handle" title="Drag to reorder">⠿</span></td>
+          <td class="drag-col"><span class="drag-handle" draggable="true" title="Drag to reorder">⠿⠿</span></td>
           <td class="id-col">${item.id}</td>
           <td class="img-col">${imgCell}</td>
           <td class="name-col">${escapeHtml(item.itemName)}</td>
@@ -133,6 +152,7 @@
     totalPendingEl.textContent = `Pending: ${totals.pending.toLocaleString()} N-Meseta`;
     totalOutEl.textContent = `Out of Stock: ${totals.out.toLocaleString()} N-Meseta`;
 
+    checkDuplicate();
     save();
   }
 
@@ -141,6 +161,10 @@
     const itemName = fItemName.value.trim();
     const name = fName.value.trim();
     if (!itemName) return;
+    if (isDuplicateName(itemName)) {
+      alert(`"${itemName}" is already in the list.`);
+      return;
+    }
     items.push({
       id: nextId++,
       image: fImage.value.trim(),
@@ -162,8 +186,14 @@
   });
 
   document.getElementById('clear-field-btn').addEventListener('click', () => {
+    const itemName = fItemName.value.trim();
+    if (itemName && !isDuplicateName(itemName)) {
+      const proceed = confirm(`"${itemName}" has not been added yet. Clear the field anyway?`);
+      if (!proceed) return;
+    }
     form.reset();
     fStatus.value = 'pending';
+    checkDuplicate();
   });
 
   tableBody.addEventListener('change', (e) => {
@@ -199,7 +229,7 @@
   tableBody.addEventListener('dragstart', (e) => {
     const tr = e.target.closest('tr[data-id]');
     if (!tr) return;
-    if (e.target.closest('input, select, a, button')) { e.preventDefault(); return; }
+    if (!e.target.closest('.drag-handle')) { e.preventDefault(); return; }
     draggedId = Number(tr.dataset.id);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', String(draggedId));
@@ -249,8 +279,6 @@
     if (!item) return;
     const tr = tableBody.querySelector(`tr[data-id="${id}"]`);
     if (!tr) return;
-
-    tr.draggable = false;
 
     tr.innerHTML = `
       <td class="drag-col"></td>
