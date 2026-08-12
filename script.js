@@ -84,7 +84,7 @@
         tr.draggable = true;
 
         const imgCell = item.image
-          ? `<img src="${escapeHtml(item.image)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'noimg',textContent:'no img'}))">`
+          ? `<img src="${escapeHtml(item.image)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'noimg',textContent:'no img'}))">`
           : `<div class="noimg">no img</div>`;
 
         const linkCell = item.link
