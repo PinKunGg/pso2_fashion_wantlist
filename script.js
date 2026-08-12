@@ -121,7 +121,7 @@
           <td class="name-col">${escapeHtml(item.itemName)}</td>
           <td class="name-col">${escapeHtml(item.name)}</td>
           <td>${linkCell}</td>
-          <td class="price-col">${priceDisplay}</td>
+          <td class="price-col ${statusClass(item.status)}">${priceDisplay}</td>
           <td>
             <select class="status-select ${statusClass(item.status)}" data-id="${item.id}">
               <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Pending</option>
