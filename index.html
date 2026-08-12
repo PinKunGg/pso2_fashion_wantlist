@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSO2 Fashion Wantlist</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<h1>PSO2 Fashion Wantlist</h1>
+<div class="sub">Track AC Scratch fashion items you want — price, links, and purchase status. Data saved in this browser; export/import JSON to back up or move devices.</div>
+
+<div class="panel">
+  <h2>Add Item</h2>
+  <form id="entry-form">
+    <div class="field">
+      <label for="f-image">Image URL</label>
+      <input type="url" id="f-image" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label for="f-itemname">Item Name</label>
+      <input type="text" id="f-itemname" placeholder="e.g. Sacred Skysuit" required>
+    </div>
+    <div class="field">
+      <label for="f-name">Scratch Name</label>
+      <input type="text" id="f-name" placeholder="e.g. Star Gate Scratch" required>
+    </div>
+    <div class="field">
+      <label for="f-link">Scratch Link</label>
+      <input type="url" id="f-link" placeholder="https://pso2.jp/...">
+    </div>
+    <div class="field">
+      <label for="f-price">Avg Price (N-Meseta)</label>
+      <input type="number" id="f-price" min="0" step="1" placeholder="0">
+    </div>
+    <div class="field">
+      <label for="f-status">Status</label>
+      <select id="f-status">
+        <option value="pending">Pending</option>
+        <option value="purchased">Purchased</option>
+        <option value="out">Out of Stock</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-primary">+ Add</button>
+    <button type="button" id="clear-field-btn" class="btn-secondary">Clear Field</button>
+  </form>
+</div>
+
+<div class="toolbar">
+  <select id="filter-name" class="filter-input">
+    <option value="all">All Scratch Names</option>
+  </select>
+  <select id="filter-status" class="filter-input">
+    <option value="all">All Statuses</option>
+    <option value="pending">Pending</option>
+    <option value="purchased">Purchased</option>
+    <option value="out">Out of Stock</option>
+  </select>
+  <button id="filter-clear-btn" class="btn-secondary btn-small">Reset Filter</button>
+  <div class="spacer"></div>
+  <div class="total-breakdown">
+    <span class="total-chip total-all" id="total-all">Total: 0</span>
+    <span class="total-chip total-purchased" id="total-purchased">Purchased: 0</span>
+    <span class="total-chip total-pending" id="total-pending">Pending: 0</span>
+    <span class="total-chip total-out" id="total-out">Out of Stock: 0</span>
+  </div>
+  <div class="count" id="item-count">0 items</div>
+</div>
+
+<div class="toolbar">
+  <button id="export-btn" class="btn-secondary">⬇ Export JSON</button>
+  <button id="import-btn" class="btn-secondary">⬆ Import JSON</button>
+  <input type="file" id="file-input" accept="application/json">
+  <button id="clear-btn" class="btn-danger">Clear All</button>
+</div>
+
+<div class="panel">
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>ID</th>
+        <th>Image</th>
+        <th>Item Name</th>
+        <th>Scratch Name</th>
+        <th>Link</th>
+        <th>Avg Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+    </tbody>
+  </table>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
