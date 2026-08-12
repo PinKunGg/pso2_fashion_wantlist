@@ -202,8 +202,7 @@
       const item = items.find(i => i.id === id);
       if (item) {
         item.status = e.target.value;
-        e.target.className = 'status-select ' + statusClass(item.status);
-        save();
+        render();
       }
     }
   });
