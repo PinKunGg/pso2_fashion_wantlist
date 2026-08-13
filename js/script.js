@@ -3,7 +3,7 @@
 // (storage, filtering/sorting, rendering) to App.Storage / App.Filters /
 // App.Render, which must already be loaded (see <script> order in index.html).
 (function () {
-  const { Storage, Render, Filters, Modal } = window.App;
+  const { Storage, Render, Filters, Modal, Catalog } = window.App;
 
   // The single source of truth for app data. `items` is the array of
   // wantlist entries; `nextId` is the id to assign to the next new item.
@@ -187,12 +187,35 @@
     }
   });
 
-  // Edit/Delete buttons inside a row.
+  // Edit/Delete live in one dropdown behind a single "⋮" trigger per row
+  // (same pattern as js/catalog.js's link menu) instead of two separate
+  // buttons. Only one row's dropdown open at a time.
+  function closeAllRowMenus() {
+    dom.tableBody.querySelectorAll('.dropdown-menu-list.open').forEach(d => d.classList.remove('open'));
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.dropdown-menu')) closeAllRowMenus();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllRowMenus();
+  });
+
+  // Menu toggle, and Edit/Delete buttons inside a row's dropdown.
   dom.tableBody.addEventListener('click', async (e) => {
+    const menuBtn = e.target.closest('.dropdown-menu-btn');
+    if (menuBtn) {
+      const dropdown = menuBtn.nextElementSibling;
+      const wasOpen = dropdown.classList.contains('open');
+      closeAllRowMenus();
+      if (!wasOpen) dropdown.classList.add('open');
+      return;
+    }
+
     const id = Number(e.target.dataset.id);
     if (!id) return; // click wasn't on a button that has a data-id (e.g. clicked empty table space)
 
     if (e.target.classList.contains('del-btn')) {
+      closeAllRowMenus();
       if (await Modal.confirm('Delete this item?', { danger: true, confirmText: 'Delete' })) {
         state.items = state.items.filter(i => i.id !== id);
         render();
@@ -200,6 +223,7 @@
     }
 
     if (e.target.classList.contains('edit-btn')) {
+      closeAllRowMenus();
       Render.startEdit(state, dom, id, render);
     }
   });
@@ -265,7 +289,12 @@
 
   // --- Export / Import JSON ---
   document.getElementById('export-btn').addEventListener('click', () => {
-    const data = JSON.stringify({ items: state.items, nextId: state.nextId, exportedAt: new Date().toISOString() }, null, 2);
+    const data = JSON.stringify({
+      items: state.items,
+      nextId: state.nextId,
+      catalog: Catalog.getExportData(), // js/catalog.js's links, separate from the wantlist items
+      exportedAt: new Date().toISOString()
+    }, null, 2);
     // Build a downloadable file entirely in the browser: wrap the JSON
     // string in a Blob, turn that into a temporary object URL, then
     // simulate a click on an invisible <a download> link to trigger the
@@ -302,12 +331,14 @@
         if (replace) {
           state.items = incoming;
           state.nextId = parsed.nextId || (state.items.reduce((m, i) => Math.max(m, i.id || 0), 0) + 1);
+          if (parsed.catalog) Catalog.replaceAll(parsed.catalog);
         } else {
           // Merge: give every incoming item a fresh id so it can't collide
           // with an existing one, instead of trusting the imported ids.
           incoming.forEach(i => {
             state.items.push({ ...i, id: state.nextId++ });
           });
+          if (parsed.catalog) Catalog.mergeAppend(parsed.catalog);
         }
         render();
       } catch (err) {

@@ -77,8 +77,13 @@ window.App = window.App || {};
             </select>
           </td>
           <td class="actions-col">
-            <button class="btn-secondary btn-small edit-btn" data-id="${item.id}">Edit</button>
-            <button class="btn-danger btn-small del-btn" data-id="${item.id}">Delete</button>
+            <span class="dropdown-menu">
+              <button type="button" class="dropdown-menu-btn" title="More options">⋮</button>
+              <div class="dropdown-menu-list">
+                <button type="button" class="edit-btn" data-id="${item.id}">Edit</button>
+                <button type="button" class="del-btn" data-id="${item.id}">Delete</button>
+              </div>
+            </span>
           </td>
         `;
         dom.tableBody.appendChild(tr);

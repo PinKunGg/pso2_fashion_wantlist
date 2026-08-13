@@ -61,6 +61,44 @@
   </form>
 </div>
 
+<!-- Catalog: a self-contained list of user-added quick links (e.g. scratch
+     catalogs, wikis) — separate from the wantlist items, its own
+     localStorage key, entirely owned by js/catalog.js (not script.js).
+     The section itself only shows the link list + an Add button; the
+     actual Label/URL fields live in the popup below. -->
+<div class="panel">
+  <h2>Catalog</h2>
+  <div class="sub" style="margin-bottom:10px">Quick links to other sites — add your own.</div>
+  <!-- js/catalog.js clears and repopulates this on every change. -->
+  <div class="catalog-list" id="catalog-list"></div>
+  <button type="button" id="catalog-add-btn" class="btn-primary" style="margin-top:12px">+ Add Link</button>
+</div>
+
+<!-- Add/Edit Link popup — one shared form, opened by #catalog-add-btn
+     (blank) or a chip's edit button (pre-filled). Reuses the same
+     .modal-overlay/.modal-box look as js/modal.js's alert/confirm, but is
+     its own separate overlay (App.Modal only supports a plain text
+     message, not input fields) — entirely owned by js/catalog.js. -->
+<div class="modal-overlay" id="catalog-modal-overlay" style="display:none">
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <div class="modal-title" id="catalog-modal-title">Add Catalog Link</div>
+    <form id="catalog-form">
+      <div class="field">
+        <label for="cat-label">Label</label>
+        <input type="text" id="cat-label" placeholder="e.g. PSO2 Wiki" required>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label for="cat-url">URL</label>
+        <input type="url" id="cat-url" placeholder="https://..." required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary btn-small" id="catalog-cancel-btn">Cancel</button>
+        <button type="submit" class="btn-primary btn-small" id="catalog-submit-btn">Add Link</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Filter/sort toolbar: js/filters.js reads these elements' .value to
      decide which items to show and in what order. Options for
      "All Scratch Names" are generated dynamically (see
@@ -175,11 +213,15 @@
 
 <!-- Load order matters: modal.js/storage.js/filters.js/render.js each
      attach themselves to window.App, and script.js (loaded last) reads
-     window.App.Modal/Storage/Filters/Render on its very first lines. -->
+     window.App.Modal/Storage/Filters/Render on its very first lines.
+     catalog.js is independent of the rest (own state, own storage key)
+     and runs itself — it just needs Modal loaded first for its delete
+     confirmation. -->
 <script src="js/modal.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/filters.js"></script>
 <script src="js/render.js"></script>
+<script src="js/catalog.js"></script>
 <script src="js/script.js"></script>
 
 </body>

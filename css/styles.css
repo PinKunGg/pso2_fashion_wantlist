@@ -237,6 +237,104 @@ select:disabled {
   border-color: var(--bad);
 }
 
+.catalog-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.catalog-empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.catalog-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 12px;
+  border-radius: 14px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+
+.catalog-item a {
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.catalog-item a:hover {
+  text-decoration: underline;
+}
+
+/* Shared "⋮" dropdown menu — used by catalog chips (js/catalog.js) and
+   table row Actions (js/render.js). One menu open at a time within each
+   owner's list, closed on outside click / Escape (see the closeAllMenus-
+   style handling in each file). */
+.dropdown-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.dropdown-menu-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.dropdown-menu-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-menu-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  flex-direction: column;
+  min-width: 110px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.dropdown-menu-list.open {
+  display: flex;
+}
+
+.dropdown-menu-list button {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  padding: 8px 12px;
+}
+
+.dropdown-menu-list .catalog-edit-btn:hover,
+.dropdown-menu-list .edit-btn:hover {
+  background: rgba(80, 139, 191, 0.15);
+  color: var(--accent);
+}
+
+.dropdown-menu-list .catalog-del-btn:hover,
+.dropdown-menu-list .del-btn:hover {
+  background: rgba(217, 7, 7, 0.15);
+  color: var(--bad);
+}
+
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
