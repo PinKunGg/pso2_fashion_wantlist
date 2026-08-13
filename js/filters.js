@@ -52,21 +52,29 @@ window.App = window.App || {};
   }
 
   // Returns a new sorted array (does not mutate `list`) based on the
-  // price/status sort dropdowns. Only one of the two can be active at a
-  // time (script.js resets the other one when you pick a sort).
+  // price/status sort dropdowns. Both can be active together: status is
+  // the primary (outer) key and price the secondary (tiebreaker) key, so
+  // e.g. status=pending→out + price=low→high groups items by status first
+  // (out-of-stock landing last, since it's the highest STATUS_ORDER value
+  // in ascending direction) and sorts by price within each status group.
   function getSortedItems(list, dom) {
     const priceDir = dom.sortPriceSelect.value;   // 'none' | 'asc' | 'desc'
     const statusDir = dom.sortStatusSelect.value;  // 'none' | 'asc' | 'desc'
     if (priceDir === 'none' && statusDir === 'none') return list; // no sort active
     const sorted = [...list]; // copy so the original array order isn't touched
-    if (priceDir !== 'none') {
-      // Number(a.price) || 0 treats '' / missing price as 0 for sorting purposes.
-      sorted.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
-      if (priceDir === 'desc') sorted.reverse();
-    } else {
-      sorted.sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
-      if (statusDir === 'desc') sorted.reverse();
-    }
+    sorted.sort((a, b) => {
+      if (statusDir !== 'none') {
+        const diff = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
+        const dir = statusDir === 'desc' ? -diff : diff;
+        if (dir !== 0) return dir; // different status groups — status alone decides
+      }
+      if (priceDir !== 'none') {
+        // Number(a.price) || 0 treats '' / missing price as 0 for sorting purposes.
+        const diff = (Number(a.price) || 0) - (Number(b.price) || 0);
+        return priceDir === 'desc' ? -diff : diff;
+      }
+      return 0;
+    });
     return sorted;
   }
 

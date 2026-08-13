@@ -144,16 +144,11 @@
   dom.filterStatusSelect.addEventListener('change', render);
   dom.filterItemTypeSelect.addEventListener('change', render);
   dom.searchItemNameInput.addEventListener('input', render); // 'input' = fires on every keystroke, not just on blur
-  dom.sortPriceSelect.addEventListener('change', () => {
-    // Only one sort can be active at a time — picking a price sort clears
-    // the status sort dropdown back to "none".
-    if (dom.sortPriceSelect.value !== 'none') dom.sortStatusSelect.value = 'none';
-    render();
-  });
-  dom.sortStatusSelect.addEventListener('change', () => {
-    if (dom.sortStatusSelect.value !== 'none') dom.sortPriceSelect.value = 'none';
-    render();
-  });
+  // Price and status sort can be active together (see getSortedItems in
+  // js/filters.js — status is the primary key, price the secondary one),
+  // so picking one no longer resets the other.
+  dom.sortPriceSelect.addEventListener('change', render);
+  dom.sortStatusSelect.addEventListener('change', render);
   document.getElementById('filter-clear-btn').addEventListener('click', () => {
     dom.filterNameInput.value = 'all';
     dom.filterStatusSelect.value = 'all';
