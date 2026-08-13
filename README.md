@@ -19,9 +19,12 @@ Open `index.html` directly in a browser, or host the folder on GitHub Pages.
 ## Project structure
 
 ```
-index.html   markup only
-styles.css   all styling
-script.js    all app logic (state, rendering, events)
+index.html        markup only
+css/styles.css     all styling
+js/storage.js      localStorage load/save
+js/filters.js      filter + sort logic
+js/render.js       table rendering + inline edit
+js/script.js       state, DOM refs, event wiring
 ```
 
 No build step, no dependencies — just static files.

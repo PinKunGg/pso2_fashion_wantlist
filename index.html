@@ -4,13 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PSO2 Fashion Wantlist</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
 <h1>PSO2 Fashion Wantlist</h1>
 <div class="sub">Track AC Scratch fashion items you want — price, links, and purchase status. Data saved in this browser; export/import JSON to back up or move devices.</div>
 
+<!-- Hidden by default; js/script.js shows this with an error message if
+     localStorage can't be read/written (e.g. blocked by the browser). -->
+<div class="storage-warning" id="storage-warning" style="display:none"></div>
+
+<!-- Add Item form: js/script.js reads these fields on submit and pushes a
+     new item into state.items. -->
 <div class="panel">
   <h2>Add Item</h2>
   <form id="entry-form">
@@ -24,6 +30,10 @@
         <span class="dup-indicator" id="dup-indicator"></span>
       </div>
       <input type="text" id="f-itemname" placeholder="e.g. Sacred Skysuit" required>
+    </div>
+    <div class="field">
+      <label for="f-itemtype">Item Type</label>
+      <select id="f-itemtype"></select>
     </div>
     <div class="field">
       <label for="f-name">Scratch Name</label>
@@ -50,6 +60,13 @@
   </form>
 </div>
 
+<!-- Filter/sort toolbar: js/filters.js reads these elements' .value to
+     decide which items to show and in what order. Options for
+     "All Scratch Names" are generated dynamically (see
+     populateScratchNameFilter in js/filters.js); #filter-itemtype's
+     options are also filled in by js/script.js from the fixed
+     App.ITEM_TYPES list (see js/filters.js) — none of these are
+     written here. -->
 <div class="toolbar">
   <select id="filter-name" class="filter-input">
     <option value="all">All Scratch Names</option>
@@ -60,6 +77,7 @@
     <option value="purchased">Purchased</option>
     <option value="out">Out of Stock</option>
   </select>
+  <select id="filter-itemtype" class="filter-input"></select>
   <button id="filter-clear-btn" class="btn-secondary btn-small">Reset Filter</button>
   <div class="spacer"></div>
   <div class="total-breakdown">
@@ -71,36 +89,97 @@
   <div class="count" id="item-count">0 items</div>
 </div>
 
+<!-- Batch edit: sets item type on whatever the filter toolbar above is
+     currently showing (js/filters.js's getFilteredItems), not all items.
+     #batch-itemtype-select is filled in by js/script.js from the same
+     App.ITEM_TYPES list as the other type dropdowns. -->
+<div class="toolbar">
+  <span class="batch-label">Batch edit filtered items:</span>
+  <select id="batch-itemtype-select" class="filter-input"></select>
+  <button id="batch-apply-itemtype-btn" class="btn-secondary btn-small">Set Type</button>
+</div>
+
+<!-- Export writes state to a downloaded .json file; Import reads one back
+     in via the hidden file input (see js/script.js). Auto-assign Type
+     guesses a type from each "None" item's name (see
+     App.Filters.autoAssignItemTypes in js/filters.js) and leaves
+     already-typed items untouched. -->
 <div class="toolbar">
   <button id="export-btn" class="btn-secondary">⬇ Export JSON</button>
   <button id="import-btn" class="btn-secondary">⬆ Import JSON</button>
   <input type="file" id="file-input" accept="application/json">
+  <button id="auto-assign-type-btn" class="btn-secondary">🏷 Auto-assign Type</button>
   <button id="clear-btn" class="btn-danger">Clear All</button>
 </div>
 
 <div class="panel table-panel">
   <div class="table-scroll">
     <table>
+      <!-- Column headers only — actual data rows (<tbody>) are built
+           entirely in JS by js/render.js, not written here. -->
       <thead>
         <tr>
           <th></th>
           <th>ID</th>
           <th>Image</th>
-          <th>Item Name</th>
+          <th class="th-sortable">
+            <span class="th-label-row">Item Name
+              <input type="text" id="search-itemname" class="th-search-input" placeholder="Search...">
+            </span>
+          </th>
+          <th>Item Type</th>
           <th>Scratch Name</th>
           <th>Link</th>
-          <th>Avg Price</th>
-          <th>Status</th>
+          <th class="th-sortable">
+            <span class="th-label-row">Avg Price
+              <select id="sort-price" class="th-sort-select" title="Sort by price">
+                <option value="none">⇅</option>
+                <option value="asc">↑ Low-High</option>
+                <option value="desc">↓ High-Low</option>
+              </select>
+            </span>
+          </th>
+          <th class="th-sortable">
+            <span class="th-label-row">Status
+              <select id="sort-status" class="th-sort-select" title="Sort by status">
+                <option value="none">⇅</option>
+                <option value="asc">↑ Pending-Out</option>
+                <option value="desc">↓ Out-Pending</option>
+              </select>
+            </span>
+          </th>
           <th>Actions</th>
         </tr>
       </thead>
+      <!-- js/render.js clears and repopulates this on every render() call. -->
       <tbody id="table-body">
       </tbody>
     </table>
   </div>
 </div>
 
-<script src="script.js"></script>
+<!-- Custom alert()/confirm() replacement (see js/modal.js). Hidden by
+     default; one single instance reused for every popup rather than
+     building a new dialog each time. -->
+<div class="modal-overlay" id="modal-overlay" style="display:none">
+  <div class="modal-box" role="alertdialog" aria-modal="true">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-message" id="modal-message"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary btn-small" id="modal-cancel-btn">Cancel</button>
+      <button type="button" class="btn-primary btn-small" id="modal-confirm-btn">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Load order matters: modal.js/storage.js/filters.js/render.js each
+     attach themselves to window.App, and script.js (loaded last) reads
+     window.App.Modal/Storage/Filters/Render on its very first lines. -->
+<script src="js/modal.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/filters.js"></script>
+<script src="js/render.js"></script>
+<script src="js/script.js"></script>
 
 </body>
 </html>
